@@ -252,7 +252,7 @@ class AgentLog(Base):
     records_processed: Mapped[Optional[int]] = mapped_column(Integer)
     duration_ms: Mapped[Optional[int]] = mapped_column(Integer)
     error: Mapped[Optional[str]] = mapped_column(Text)
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON)
+    extra_data: Mapped[Optional[dict]] = mapped_column("metadata", JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
