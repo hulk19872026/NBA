@@ -13,22 +13,32 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import enum
 
+import logging
+
 from app.core.config import settings
 
-# Engine
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.DEBUG,
-    pool_size=10,
-    max_overflow=20,
-    pool_pre_ping=True,
-)
+logger = logging.getLogger(__name__)
 
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+# Engine — created lazily if DATABASE_URL points to an unreachable host,
+# the error surfaces at query time, not at import time.
+try:
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        echo=settings.DEBUG,
+        pool_size=10,
+        max_overflow=20,
+        pool_pre_ping=True,
+    )
+
+    AsyncSessionLocal = async_sessionmaker(
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+except Exception as e:
+    logger.warning(f"⚠️ Could not create DB engine: {e}")
+    engine = None
+    AsyncSessionLocal = None
 
 
 class Base(DeclarativeBase):
@@ -248,6 +258,8 @@ class AgentLog(Base):
 # ── Session dependency ────────────────────────────────────────────────────────
 
 async def get_db():
+    if AsyncSessionLocal is None:
+        raise RuntimeError("Database is not configured")
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -261,5 +273,7 @@ async def get_db():
 
 async def init_db():
     """Create all tables."""
+    if engine is None:
+        raise RuntimeError("Database engine is not configured")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

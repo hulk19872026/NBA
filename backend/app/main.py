@@ -27,19 +27,28 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
     logger.info("🏀 NBA Analytics Platform starting up...")
-    
-    # Initialize database
-    await init_db()
-    logger.info("✅ Database initialized")
-    
-    # Start background scheduler
-    scheduler.start()
-    logger.info("✅ Agent scheduler started")
-    
+
+    # Initialize database (non-fatal — app can serve health checks without DB)
+    try:
+        await init_db()
+        logger.info("✅ Database initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Database not available, continuing without DB: {e}")
+
+    # Start background scheduler (non-fatal)
+    try:
+        scheduler.start()
+        logger.info("✅ Agent scheduler started")
+    except Exception as e:
+        logger.warning(f"⚠️ Scheduler failed to start: {e}")
+
     yield
-    
+
     # Graceful shutdown
-    scheduler.shutdown(wait=False)
+    try:
+        scheduler.shutdown(wait=False)
+    except Exception:
+        pass
     logger.info("🛑 NBA Analytics Platform shutting down...")
 
 
