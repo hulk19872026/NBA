@@ -11,11 +11,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies (cached layer)
 COPY backend/requirements.txt .
+# Build bust: 2026-04-05-v2
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
@@ -23,13 +23,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY backend/app ./app
 COPY backend/alembic.ini .
 
-# Create non-root user
+# Non-root user
 RUN adduser --disabled-password --gecos "" appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE ${PORT}
 
-# exec ensures uvicorn is PID 1 (receives signals from Railway)
-# Single worker to stay within Railway free-tier memory limits
-CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1"]
+# exec ensures uvicorn is PID 1 (proper signal handling from Railway)
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers 1"]
