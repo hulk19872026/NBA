@@ -29,9 +29,12 @@ async def lifespan(app: FastAPI):
     logger.info("🏀 NBA Analytics Platform starting up...")
 
     # Initialize database (non-fatal — app can serve health checks without DB)
+    # Use a short timeout so this doesn't block startup past the health check window
     try:
-        await init_db()
+        await asyncio.wait_for(init_db(), timeout=10)
         logger.info("✅ Database initialized")
+    except asyncio.TimeoutError:
+        logger.warning("⚠️ Database connection timed out (10s), continuing without DB")
     except Exception as e:
         logger.warning(f"⚠️ Database not available, continuing without DB: {e}")
 

@@ -78,7 +78,10 @@ scheduler.add_job(
     coalesce=True,
 )
 
-# Odds refresh every 5 minutes during NBA hours (5 PM - midnight ET)
+# Odds refresh every 5 minutes
+# jitter=30 avoids thundering herd; next_run_time deferred so it doesn't fire at boot
+from datetime import datetime as _dt, timedelta as _td
+
 scheduler.add_job(
     run_odds_refresh,
     IntervalTrigger(seconds=settings.ODDS_REFRESH_INTERVAL),
@@ -86,6 +89,7 @@ scheduler.add_job(
     replace_existing=True,
     max_instances=1,
     coalesce=True,
+    next_run_time=_dt.now() + _td(seconds=settings.ODDS_REFRESH_INTERVAL),
 )
 
 # Predictions refresh every hour
@@ -96,4 +100,5 @@ scheduler.add_job(
     replace_existing=True,
     max_instances=1,
     coalesce=True,
+    next_run_time=_dt.now() + _td(seconds=settings.PREDICTIONS_REFRESH_INTERVAL),
 )

@@ -31,4 +31,5 @@ USER appuser
 EXPOSE ${PORT}
 
 # Use shell form so $PORT is expanded at runtime
-CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
+# Single worker to stay within Railway free-tier memory limits
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 30
