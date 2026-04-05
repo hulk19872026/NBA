@@ -1,0 +1,11 @@
+.git
+.gitignore
+README.md
+docker-compose.yml
+frontend/
+database/
+**/__pycache__
+**/*.pyc
+**/.env
+**/node_modules
+**/.next

@@ -1,27 +1,10 @@
-# Railway deployment configuration
-# Deploy each service individually via Railway dashboard or CLI
-
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 watchPatterns = ["backend/**"]
 
 [deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
-
-# ── Service-specific configs ───────────────────────────────────────────────
-# Set these as environment variables in Railway dashboard:
-#
-# BACKEND service:
-#   DATABASE_URL        = ${{Postgres.DATABASE_URL}}
-#   REDIS_URL           = ${{Redis.REDIS_URL}}
-#   ODDS_API_KEY        = your_key
-#   BALLDONTLIE_API_KEY = your_key
-#   ANTHROPIC_API_KEY   = your_key
-#   SECRET_KEY          = random_64_char_string
-#   ALLOWED_ORIGINS     = https://your-frontend.railway.app
-#   DEBUG               = false
-#
-# FRONTEND service:
-#   NEXT_PUBLIC_API_URL = https://your-backend.railway.app/api
