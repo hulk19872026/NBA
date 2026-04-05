@@ -5,8 +5,7 @@ import { ChevronDown, ChevronUp, AlertTriangle, Clock, Zap } from "lucide-react"
 import { clsx } from "clsx";
 import type { Game } from "@/lib/api";
 import { formatMoneyline, formatSpread, formatEdge, isFavorite } from "@/lib/api";
-import { ProbabilityBar } from "./ProbabilityBar";
-import { EdgeBadge } from "./EdgeBadge";
+import { ProbabilityBar, EdgeBadge } from "./ProbabilityBar";
 
 interface GameCardProps {
   game: Game;
