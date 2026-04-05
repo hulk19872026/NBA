@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts ──────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── CSS Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --color-electric: #00e5ff;
+  --color-gold: #ffd700;
+  --color-edge-pos: #00e676;
+  --color-edge-neg: #ff1744;
+  --color-surface-1: #0c1221;
+  --color-surface-2: #101828;
+  --color-surface-3: #141f30;
+  --color-surface-4: #1a2640;
+  --color-border: rgba(255,255,255,0.06);
+  --color-border-electric: rgba(0,229,255,0.15);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #040610;
+  color: #e2e8f0;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+}
+
+::selection {
+  background: rgba(0, 229, 255, 0.2);
+  color: #ffffff;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #040610; }
+::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,229,255,0.4); }
+
+/* ── Typography utilities ──────────────────────────────────────────────────── */
+.font-display { font-family: var(--font-display, 'Barlow Condensed', sans-serif); }
+.font-mono { font-family: var(--font-mono, 'JetBrains Mono', monospace); }
+
+/* ── Component Classes ─────────────────────────────────────────────────────── */
+@layer components {
+  /* Glass card */
+  .card {
+    @apply bg-surface-2 border border-white/[0.06] rounded-xl backdrop-blur-sm;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 40px rgba(0,229,255,0.06);
+    border-color: rgba(0,229,255,0.12);
+  }
+
+  .card-elevated {
+    @apply bg-surface-3 border border-white/[0.08] rounded-xl;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* Electric badge */
+  .badge-electric {
+    @apply text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full;
+    background: rgba(0,229,255,0.1);
+    color: var(--color-electric);
+    border: 1px solid rgba(0,229,255,0.2);
+  }
+
+  /* Edge badge */
+  .badge-edge-pos {
+    @apply text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full;
+    background: rgba(0,230,118,0.1);
+    color: var(--color-edge-pos);
+    border: 1px solid rgba(0,230,118,0.25);
+  }
+
+  .badge-edge-neg {
+    @apply text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full;
+    background: rgba(255,23,68,0.1);
+    color: var(--color-edge-neg);
+    border: 1px solid rgba(255,23,68,0.25);
+  }
+
+  /* Live indicator */
+  .live-dot {
+    @apply w-2 h-2 rounded-full bg-red-500;
+    animation: liveDot 1.5s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(239,68,68,0.6);
+  }
+
+  /* Stat cell */
+  .stat-cell {
+    @apply text-center py-3 px-2;
+  }
+
+  .stat-value {
+    @apply font-mono text-lg font-semibold text-white;
+  }
+
+  .stat-label {
+    @apply text-[10px] uppercase tracking-widest text-slate-500 mt-0.5;
+  }
+
+  /* Probability bar */
+  .prob-bar-track {
+    @apply w-full h-2 rounded-full overflow-hidden;
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150;
+    background: rgba(0,229,255,0.12);
+    color: var(--color-electric);
+    border: 1px solid rgba(0,229,255,0.2);
+  }
+
+  .btn-primary:hover {
+    background: rgba(0,229,255,0.2);
+    box-shadow: 0 0 20px rgba(0,229,255,0.15);
+  }
+
+  /* Section header */
+  .section-header {
+    @apply text-2xl font-display font-bold uppercase tracking-wide text-white;
+  }
+
+  /* Moneyline chip */
+  .ml-chip {
+    @apply font-mono text-sm font-semibold px-3 py-1 rounded-lg;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .ml-chip-fav {
+    background: rgba(0,229,255,0.08);
+    border-color: rgba(0,229,255,0.15);
+    color: var(--color-electric);
+  }
+
+  .ml-chip-dog {
+    background: rgba(255,215,0,0.06);
+    border-color: rgba(255,215,0,0.15);
+    color: var(--color-gold);
+  }
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes liveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.75); }
+}
+
+.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in { animation: fadeIn 0.3s ease both; }
+
+/* Staggered children */
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
