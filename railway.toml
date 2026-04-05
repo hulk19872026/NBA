@@ -3,7 +3,8 @@
 
 [build]
 builder = "DOCKERFILE"
-watchPatterns = ["backend/**", "frontend/**"]
+dockerfilePath = "backend/Dockerfile"
+watchPatterns = ["backend/**"]
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
