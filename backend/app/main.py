@@ -12,9 +12,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.core.scheduler import scheduler
-from app.api.routes import games, teams, players, odds, predictions, agents, health, ai
-from app.models.database import init_db
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,32 +20,43 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Startup and shutdown lifecycle management."""
-    logger.info("🏀 NBA Analytics Platform starting up...")
+async def _deferred_startup():
+    """Run slow startup tasks in background so health checks pass immediately."""
+    # Wait a beat so uvicorn is fully ready to serve
+    await asyncio.sleep(1)
 
-    # Initialize database (non-fatal — app can serve health checks without DB)
-    # Use a short timeout so this doesn't block startup past the health check window
+    # Database init
     try:
+        from app.models.database import init_db
         await asyncio.wait_for(init_db(), timeout=10)
         logger.info("✅ Database initialized")
-    except asyncio.TimeoutError:
-        logger.warning("⚠️ Database connection timed out (10s), continuing without DB")
     except Exception as e:
-        logger.warning(f"⚠️ Database not available, continuing without DB: {e}")
+        logger.warning(f"⚠️ Database not available: {e}")
 
-    # Start background scheduler (non-fatal)
+    # Scheduler
     try:
+        from app.core.scheduler import scheduler
         scheduler.start()
         logger.info("✅ Agent scheduler started")
     except Exception as e:
         logger.warning(f"⚠️ Scheduler failed to start: {e}")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup and shutdown lifecycle management."""
+    logger.info("🏀 NBA Analytics Platform starting up...")
+
+    # Fire off DB + scheduler init in background — don't block health checks
+    startup_task = asyncio.create_task(_deferred_startup())
+
+    logger.info("✅ Server ready — accepting requests")
     yield
 
     # Graceful shutdown
+    startup_task.cancel()
     try:
+        from app.core.scheduler import scheduler
         scheduler.shutdown(wait=False)
     except Exception:
         pass
@@ -74,8 +82,11 @@ app.add_middleware(
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Routers
+# Import routers lazily to keep startup fast
+from app.api.routes import health  # noqa: E402
 app.include_router(health.router, prefix="/api", tags=["Health"])
+
+from app.api.routes import games, teams, players, odds, predictions, agents, ai  # noqa: E402
 app.include_router(games.router, prefix="/api/games", tags=["Games"])
 app.include_router(teams.router, prefix="/api/teams", tags=["Teams"])
 app.include_router(players.router, prefix="/api/players", tags=["Players"])
