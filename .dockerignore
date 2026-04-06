@@ -1,11 +1,9 @@
 .git
-.gitignore
 README.md
 docker-compose.yml
-frontend/
 database/
 **/__pycache__
-**/*.pyc
+*.pyc
 **/.env
 **/node_modules
 **/.next

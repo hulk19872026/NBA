@@ -96,13 +96,6 @@ app.include_router(agents.router, prefix="/api/agents", tags=["Agents"])
 app.include_router(ai.router, prefix="/api/ai", tags=["AI Analyst"])
 
 
-@app.get("/")
-async def root():
-    """Root redirect to API docs."""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/api/docs")
-
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     logger.error(f"Unhandled exception: {exc}", exc_info=True)

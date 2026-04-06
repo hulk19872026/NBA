@@ -192,7 +192,7 @@ export default function HomePage() {
       {loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 stagger-children">
           {Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonCard key={i} className="animate-slide-up" />
+            <SkeletonCard key={i} />
           ))}
         </div>
       ) : groupedGames.length === 0 ? (
