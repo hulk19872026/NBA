@@ -53,14 +53,14 @@ export default function HomePage() {
         status: statusFilter || undefined,
         min_edge: edgeFilter > 0 ? edgeFilter : undefined,
       });
-      setGames(data.games);
-      setTotalGames(data.total);
-      setHighEdgeCount(data.high_edge_count);
-    } catch (err) {
-      console.error(err);
-      // Fallback demo data for preview
-      setGames(getDemoGames());
-      setTotalGames(getDemoGames().length);
+      setGames(data?.games ?? getDemoGames());
+      setTotalGames(data?.total ?? 0);
+      setHighEdgeCount(data?.high_edge_count ?? 0);
+    } catch {
+      // API unavailable — use demo data
+      const demo = getDemoGames();
+      setGames(demo);
+      setTotalGames(demo.length);
       setHighEdgeCount(2);
     } finally {
       setLoading(false);
@@ -84,12 +84,13 @@ export default function HomePage() {
     }
   };
 
-  const liveGames = games.filter((g) => g.status === "live");
-  const upcomingGames = games.filter((g) => g.status === "scheduled");
-  const finalGames = games.filter((g) => g.status === "final");
+  const safeGames = games ?? [];
+  const liveGames = safeGames.filter((g) => g.status === "live");
+  const upcomingGames = safeGames.filter((g) => g.status === "scheduled");
+  const finalGames = safeGames.filter((g) => g.status === "final");
 
   const groupedGames = statusFilter
-    ? games
+    ? safeGames
     : [...liveGames, ...upcomingGames, ...finalGames];
 
   return (
