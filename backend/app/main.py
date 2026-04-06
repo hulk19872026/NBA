@@ -5,11 +5,13 @@ Multi-agent architecture for NBA intelligence
 
 import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 
@@ -22,10 +24,8 @@ logger = logging.getLogger(__name__)
 
 async def _deferred_startup():
     """Run slow startup tasks in background so health checks pass immediately."""
-    # Wait a beat so uvicorn is fully ready to serve
     await asyncio.sleep(1)
 
-    # Database init
     try:
         from app.models.database import init_db
         await asyncio.wait_for(init_db(), timeout=10)
@@ -33,7 +33,6 @@ async def _deferred_startup():
     except Exception as e:
         logger.warning(f"⚠️ Database not available: {e}")
 
-    # Scheduler
     try:
         from app.core.scheduler import scheduler
         scheduler.start()
@@ -46,14 +45,9 @@ async def _deferred_startup():
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle management."""
     logger.info("🏀 NBA Analytics Platform starting up...")
-
-    # Fire off DB + scheduler init in background — don't block health checks
     startup_task = asyncio.create_task(_deferred_startup())
-
     logger.info("✅ Server ready — accepting requests")
     yield
-
-    # Graceful shutdown
     startup_task.cancel()
     try:
         from app.core.scheduler import scheduler
@@ -75,14 +69,14 @@ app = FastAPI(
 # Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Import routers lazily to keep startup fast
+# API Routers
 from app.api.routes import health  # noqa: E402
 app.include_router(health.router, prefix="/api", tags=["Health"])
 
@@ -95,6 +89,38 @@ app.include_router(predictions.router, prefix="/api/predictions", tags=["Predict
 app.include_router(agents.router, prefix="/api/agents", tags=["Agents"])
 app.include_router(ai.router, prefix="/api/ai", tags=["AI Analyst"])
 
+# Serve Next.js static frontend
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.isdir(FRONTEND_DIR):
+    # Serve _next/static assets
+    app.mount("/_next", StaticFiles(directory=os.path.join(FRONTEND_DIR, "_next")), name="next-assets")
+
+    # Serve all frontend pages as a catch-all
+    from fastapi.responses import FileResponse
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        """Serve the Next.js static export for all non-API routes."""
+        file_path = os.path.join(FRONTEND_DIR, full_path)
+
+        # Try exact file
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+
+        # Try as directory with index.html
+        index_path = os.path.join(file_path, "index.html")
+        if os.path.isfile(index_path):
+            return FileResponse(index_path)
+
+        # Fallback to root index.html (SPA routing)
+        root_index = os.path.join(FRONTEND_DIR, "index.html")
+        if os.path.isfile(root_index):
+            return FileResponse(root_index)
+
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+else:
+    logger.warning(f"⚠️ Frontend directory not found at {FRONTEND_DIR}, serving API only")
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
@@ -102,15 +128,4 @@ async def global_exception_handler(request, exc):
     return JSONResponse(
         status_code=500,
         content={"error": "Internal server error", "detail": str(exc)}
-    )
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=settings.PORT,
-        reload=settings.DEBUG,
-        workers=1 if settings.DEBUG else 4,
     )

@@ -5,7 +5,7 @@ watchPatterns = ["backend/**", "frontend/**"]
 noCache = true
 
 [deploy]
-healthcheckPath = "/"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5

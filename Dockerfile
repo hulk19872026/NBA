@@ -1,4 +1,4 @@
-# ── Stage 1: Build Next.js frontend ──────────────────────────────────────────
+# ── Stage 1: Build Next.js static export ────────────────────────────────────
 FROM node:20-alpine AS frontend-builder
 WORKDIR /frontend
 
@@ -7,10 +7,10 @@ RUN npm ci
 
 COPY frontend/ .
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_PUBLIC_API_URL=/api
 RUN npm run build
+# Output is in /frontend/out/
 
-# ── Stage 2: Python backend + serve frontend ────────────────────────────────
+# ── Stage 2: Python backend serving everything ──────────────────────────────
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -22,10 +22,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
-    nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Python deps
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
@@ -34,18 +32,13 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY backend/app ./app
 COPY backend/alembic.ini .
 
-# Frontend standalone build
-COPY --from=frontend-builder /frontend/.next/standalone ./frontend
-COPY --from=frontend-builder /frontend/.next/static ./frontend/.next/static
-COPY --from=frontend-builder /frontend/public ./frontend/public
-
-# Startup script
-COPY start.sh .
-RUN chmod +x start.sh
+# Frontend static files — served by FastAPI
+COPY --from=frontend-builder /frontend/out ./static
 
 # Non-root user
 RUN adduser --disabled-password --gecos "" appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-CMD ["sh", "/app/start.sh"]
+# Single process — FastAPI serves both API and frontend
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]

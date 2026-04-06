@@ -5,7 +5,9 @@
 
 import axios from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+const API_BASE = typeof window !== "undefined"
+  ? `${window.location.origin}/api`
+  : "/api";
 
 export const api = axios.create({
   baseURL: API_BASE,
