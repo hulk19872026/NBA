@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
 import { RefreshCw, ChevronLeft, ChevronRight, Filter, Zap, Activity, TrendingUp } from "lucide-react";
+
+function formatDate(d: Date, style: "iso" | "display" | "short") {
+  if (style === "iso") return d.toISOString().split("T")[0];
+  if (style === "short") return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+}
 import { clsx } from "clsx";
 import toast from "react-hot-toast";
 import { GameCard } from "@/components/GameCard";
@@ -36,9 +41,9 @@ export default function HomePage() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const dateStr = mounted ? format(selectedDate, "yyyy-MM-dd") : "";
-  const displayDate = mounted ? format(selectedDate, "EEEE, MMMM d") : "";
-  const isToday = mounted ? format(new Date(), "yyyy-MM-dd") === dateStr : true;
+  const dateStr = mounted ? formatDate(selectedDate, "iso") : "";
+  const displayDate = mounted ? formatDate(selectedDate, "display") : "";
+  const isToday = mounted ? formatDate(new Date(), "iso") === dateStr : true;
 
   const fetchGames = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -111,7 +116,7 @@ export default function HomePage() {
               <ChevronLeft size={16} />
             </button>
             <span className="px-3 text-sm font-mono text-slate-300 min-w-[90px] text-center">
-              {isToday ? "Today" : format(selectedDate, "MMM d")}
+              {isToday ? "Today" : formatDate(selectedDate, "short")}
             </span>
             <button
               onClick={() => setSelectedDate((d) => { const n = new Date(d); n.setDate(n.getDate() + 1); return n; })}
