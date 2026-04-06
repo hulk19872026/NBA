@@ -16,12 +16,12 @@ const AGENTS_DEMO = [
 ];
 
 const LOGS_DEMO: AgentLog[] = [
-  { id: 6, agent: "ClaudeAnalystAgent", status: "success", message: "Generated 6 game narratives + 3 edge explanations", records_processed: 14, duration_ms: 8300, error: null, created_at: new Date().toISOString() },
-  { id: 5, agent: "GameContextAgent", status: "success", message: "Analyzed context for 8 games", records_processed: 8, duration_ms: 6100, error: null, created_at: new Date().toISOString() },
-  { id: 4, agent: "OddsAggregationAgent", status: "success", message: "Stored odds for 24 game-book combos", records_processed: 144, duration_ms: 2800, error: null, created_at: new Date().toISOString() },
-  { id: 3, agent: "DataCollectionAgent", status: "success", message: "Collected 312 records for today", records_processed: 312, duration_ms: 4200, error: null, created_at: new Date().toISOString() },
-  { id: 2, agent: "AnalyticsAgent", status: "running", message: "Calculating predictions for 8 games...", records_processed: 8, duration_ms: null, error: null, created_at: new Date().toISOString() },
-  { id: 1, agent: "Orchestrator", status: "success", message: "Full pipeline started — 6 agents coordinating", records_processed: 847, duration_ms: 12400, error: null, created_at: new Date().toISOString() },
+  { id: 6, agent: "ClaudeAnalystAgent", status: "success", message: "Generated 6 game narratives + 3 edge explanations", records_processed: 14, duration_ms: 8300, error: null, created_at: "2025-04-05T12:00:00Z" },
+  { id: 5, agent: "GameContextAgent", status: "success", message: "Analyzed context for 8 games", records_processed: 8, duration_ms: 6100, error: null, created_at: "2025-04-05T12:00:00Z" },
+  { id: 4, agent: "OddsAggregationAgent", status: "success", message: "Stored odds for 24 game-book combos", records_processed: 144, duration_ms: 2800, error: null, created_at: "2025-04-05T12:00:00Z" },
+  { id: 3, agent: "DataCollectionAgent", status: "success", message: "Collected 312 records for today", records_processed: 312, duration_ms: 4200, error: null, created_at: "2025-04-05T12:00:00Z" },
+  { id: 2, agent: "AnalyticsAgent", status: "running", message: "Calculating predictions for 8 games...", records_processed: 8, duration_ms: null, error: null, created_at: "2025-04-05T12:00:00Z" },
+  { id: 1, agent: "Orchestrator", status: "success", message: "Full pipeline started — 6 agents coordinating", records_processed: 847, duration_ms: 12400, error: null, created_at: "2025-04-05T12:00:00Z" },
 ];
 
 type ChatMsg = { role: "user" | "assistant"; content: string };

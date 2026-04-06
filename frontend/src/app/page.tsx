@@ -27,15 +27,18 @@ export default function HomePage() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [statusFilter, setStatusFilter] = useState("");
   const [edgeFilter, setEdgeFilter] = useState(0);
   const [highEdgeCount, setHighEdgeCount] = useState(0);
   const [totalGames, setTotalGames] = useState(0);
 
-  const dateStr = format(selectedDate, "yyyy-MM-dd");
-  const displayDate = format(selectedDate, "EEEE, MMMM d");
-  const isToday = format(new Date(), "yyyy-MM-dd") === dateStr;
+  useEffect(() => { setMounted(true); }, []);
+
+  const dateStr = mounted ? format(selectedDate, "yyyy-MM-dd") : "";
+  const displayDate = mounted ? format(selectedDate, "EEEE, MMMM d") : "";
+  const isToday = mounted ? format(new Date(), "yyyy-MM-dd") === dateStr : true;
 
   const fetchGames = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -61,8 +64,8 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    fetchGames();
-  }, [dateStr, statusFilter, edgeFilter]);
+    if (mounted) fetchGames();
+  }, [mounted, dateStr, statusFilter, edgeFilter]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -232,7 +235,7 @@ function getDemoGames(): Game[] {
       home_score: null, away_score: null, home_b2b: false, away_b2b: true,
       home_rest_days: 2, away_rest_days: 1,
       game_summary: "Golden State travel to Boston on the second night of a back-to-back, facing a Celtics squad with one of the league's best home records. Boston's defensive rating advantage becomes even more pronounced against fatigued opponents.",
-      odds: [{ sportsbook: "draftkings", home_ml: -185, away_ml: 155, home_spread: -5.5, away_spread: 5.5, total: 228.5, over_price: -110, under_price: -110, fetched_at: new Date().toISOString() }],
+      odds: [{ sportsbook: "draftkings", home_ml: -185, away_ml: 155, home_spread: -5.5, away_spread: 5.5, total: 228.5, over_price: -110, under_price: -110, fetched_at: "2025-04-05T12:00:00Z" }],
       prediction: { home_win_prob: 67.3, away_win_prob: 32.7, home_implied_prob: 64.9, away_implied_prob: 35.1, home_edge: 2.4, away_edge: -2.4, projected_total: 226.8, confidence_score: 78, recommended_bet: "HOME_ML", recommended_units: 0.8, factors: { elo_prob: 65.1, rating_prob: 69.4, home_elo: 1623, away_elo: 1571 } },
     },
     {
@@ -243,7 +246,7 @@ function getDemoGames(): Game[] {
       home_score: 68, away_score: 61, home_b2b: false, away_b2b: false,
       home_rest_days: 2, away_rest_days: 2,
       game_summary: "OKC's historic pace continues as they host a Mavericks team that's struggled in road games. Shai Gilgeous-Alexander's efficiency edge over Luka Doncic is the key matchup to watch.",
-      odds: [{ sportsbook: "draftkings", home_ml: -210, away_ml: 175, home_spread: -6.5, away_spread: 6.5, total: 222.0, over_price: -110, under_price: -110, fetched_at: new Date().toISOString() }],
+      odds: [{ sportsbook: "draftkings", home_ml: -210, away_ml: 175, home_spread: -6.5, away_spread: 6.5, total: 222.0, over_price: -110, under_price: -110, fetched_at: "2025-04-05T12:00:00Z" }],
       prediction: { home_win_prob: 72.1, away_win_prob: 27.9, home_implied_prob: 67.7, away_implied_prob: 32.3, home_edge: 4.4, away_edge: -4.4, projected_total: 219.4, confidence_score: 84, recommended_bet: "HOME_ML", recommended_units: 1.2, factors: { elo_prob: 70.8, rating_prob: 73.2, home_elo: 1641, away_elo: 1543 } },
     },
     {
@@ -254,7 +257,7 @@ function getDemoGames(): Game[] {
       home_score: null, away_score: null, home_b2b: false, away_b2b: false,
       home_rest_days: 3, away_rest_days: 3,
       game_summary: "Tight divisional rematch at altitude. Denver's home court advantage in the thin air of Ball Arena provides a measurable performance boost that analytics consistently undervalue in betting markets.",
-      odds: [{ sportsbook: "fanduel", home_ml: -135, away_ml: 115, home_spread: -3.0, away_spread: 3.0, total: 218.5, over_price: -112, under_price: -108, fetched_at: new Date().toISOString() }],
+      odds: [{ sportsbook: "fanduel", home_ml: -135, away_ml: 115, home_spread: -3.0, away_spread: 3.0, total: 218.5, over_price: -112, under_price: -108, fetched_at: "2025-04-05T12:00:00Z" }],
       prediction: { home_win_prob: 57.8, away_win_prob: 42.2, home_implied_prob: 57.4, away_implied_prob: 47.6, home_edge: 0.4, away_edge: -5.4, projected_total: 221.2, confidence_score: 61, recommended_bet: "AWAY_ML", recommended_units: 1.5, factors: { elo_prob: 55.9, rating_prob: 58.2, home_elo: 1578, away_elo: 1562 } },
     },
     {
@@ -265,7 +268,7 @@ function getDemoGames(): Game[] {
       home_score: null, away_score: null, home_b2b: false, away_b2b: true,
       home_rest_days: 2, away_rest_days: 1,
       game_summary: "New York enter Miami on zero days rest. The Heat historically exploit back-to-back opponents, and their defensive scheme specifically neutralizes high-usage guards like Jalen Brunson late in games.",
-      odds: [{ sportsbook: "betmgm", home_ml: 110, away_ml: -130, home_spread: 2.5, away_spread: -2.5, total: 209.0, over_price: -110, under_price: -110, fetched_at: new Date().toISOString() }],
+      odds: [{ sportsbook: "betmgm", home_ml: 110, away_ml: -130, home_spread: 2.5, away_spread: -2.5, total: 209.0, over_price: -110, under_price: -110, fetched_at: "2025-04-05T12:00:00Z" }],
       prediction: { home_win_prob: 51.4, away_win_prob: 48.6, home_implied_prob: 47.6, away_implied_prob: 52.4, home_edge: 3.8, away_edge: -3.8, projected_total: 211.6, confidence_score: 54, recommended_bet: "HOME_ML", recommended_units: 1.0, factors: { elo_prob: 48.2, rating_prob: 52.1, home_elo: 1512, away_elo: 1548 } },
     },
     {
@@ -276,7 +279,7 @@ function getDemoGames(): Game[] {
       home_score: 118, away_score: 104, home_b2b: false, away_b2b: false,
       home_rest_days: 2, away_rest_days: 2,
       game_summary: "Lakers controlled this contest from the first quarter, with LeBron's playmaking setting the tone against a Phoenix defense struggling with transition coverage all season.",
-      odds: [{ sportsbook: "caesars", home_ml: -155, away_ml: 130, home_spread: -4.5, away_spread: 4.5, total: 215.5, over_price: -110, under_price: -110, fetched_at: new Date().toISOString() }],
+      odds: [{ sportsbook: "caesars", home_ml: -155, away_ml: 130, home_spread: -4.5, away_spread: 4.5, total: 215.5, over_price: -110, under_price: -110, fetched_at: "2025-04-05T12:00:00Z" }],
       prediction: { home_win_prob: 63.1, away_win_prob: 36.9, home_implied_prob: 60.8, away_implied_prob: 39.2, home_edge: 2.3, away_edge: -2.3, projected_total: 217.8, confidence_score: 69, recommended_bet: null, recommended_units: null, factors: { elo_prob: 61.4, rating_prob: 64.8, home_elo: 1534, away_elo: 1491 } },
     },
     {
@@ -287,7 +290,7 @@ function getDemoGames(): Game[] {
       home_score: null, away_score: null, home_b2b: false, away_b2b: false,
       home_rest_days: 2, away_rest_days: 2,
       game_summary: "Indiana's league-leading pace of 103.1 will test Milwaukee's ability to contain in transition. The Bucks have allowed opponents to score 12+ fast break points in 60% of games this season.",
-      odds: [{ sportsbook: "draftkings", home_ml: -120, away_ml: 100, home_spread: -1.5, away_spread: 1.5, total: 236.5, over_price: -108, under_price: -112, fetched_at: new Date().toISOString() }],
+      odds: [{ sportsbook: "draftkings", home_ml: -120, away_ml: 100, home_spread: -1.5, away_spread: 1.5, total: 236.5, over_price: -108, under_price: -112, fetched_at: "2025-04-05T12:00:00Z" }],
       prediction: { home_win_prob: 52.8, away_win_prob: 47.2, home_implied_prob: 54.5, away_implied_prob: 45.5, home_edge: -1.7, away_edge: 1.7, projected_total: 238.4, confidence_score: 48, recommended_bet: null, recommended_units: null, factors: { elo_prob: 53.1, rating_prob: 52.4, home_elo: 1539, away_elo: 1527 } },
     },
   ] as Game[];
